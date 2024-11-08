@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  bot:
+    build:
+      dockerfile: ./Dockerfile
+    restart: always
+
+    volumes:
+      - "./db_name.db:/project_name/db_name.db"

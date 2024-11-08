@@ -1,0 +1,2 @@
+python botmain.py
+wait
