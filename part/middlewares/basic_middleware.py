@@ -2,13 +2,13 @@ from typing import Callable, Dict, Any, Awaitable
 
 from aiogram import BaseMiddleware, Bot
 from aiogram.types import TelegramObject
-from sqlalchemy.ext.asyncio.session import async_sessionmaker, AsyncSession
+from sqlalchemy.orm import sessionmaker, Session
 
-from part.database import DBClass
+from core.db_class import DBClass
 
 
 class BasicMiddleware(BaseMiddleware):
-    def __init__(self, token: str, session: async_sessionmaker[AsyncSession]):
+    def __init__(self, token: str, session: sessionmaker[Session]):
         self.token = token
         self.session = session
 
@@ -31,11 +31,11 @@ class BasicMiddleware(BaseMiddleware):
             data["bot"] = bot
 
         if not db:
-            async with self.session() as session:
+            with self.session() as session:
                 db = DBClass(session=session)
 
                 data["db"] = db
-                user = await db.user.get_user(uuid=user_id)
+                user = await db.user.get_user(user_id=user_id)
                 if not user:
                     full_name = event.from_user.full_name
                     username = event.from_user.username

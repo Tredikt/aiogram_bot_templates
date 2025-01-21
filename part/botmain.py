@@ -2,39 +2,45 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
+from core.db_templates import BaseModel
 from middlewares.basic_middleware import BasicMiddleware
 from settings import env_settings
 
-from database import ModelBase
-
-from handlers import routers
+from core.router import core_router
+from admin.router import admin_router
+from menu.router import menu_router
 
 
 async def main():
     logging.basicConfig(level=logging.INFO)
 
-    telegram_token = env_settings.token
-    # telegram_token = settings.test__telegram__token
+    telegram_token = env_settings.telegram__token
     database_url = env_settings.database__url
 
-    engine = create_async_engine(database_url)
+    engine = create_engine(database_url)
 
-    async with engine.begin() as conn:
-        await conn.run_sync(ModelBase.metadata.create_all)
-
-    session = async_sessionmaker(engine, expire_on_commit=False)
+    BaseModel.metadata.create_all(bind=engine)
+    session = sessionmaker(engine, expire_on_commit=False)
 
     storage = MemoryStorage()
 
-    bot = Bot(token=telegram_token)
+    bot = Bot(token=telegram_token, default=DefaultBotProperties(parse_mode="HTML"))
     dp = Dispatcher(bot=bot, storage=storage)
+
+    routers = [
+        core_router,
+        admin_router,
+        menu_router
+    ]
 
     dp.include_routers(*routers)
 
-    dp.update.middleware(BasicMiddleware(token=env_settings.token, session=session))
+    dp.update.middleware(BasicMiddleware(token=env_settings.telegram__token, session=session))
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
