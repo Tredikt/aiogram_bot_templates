@@ -11,32 +11,21 @@ from core.db_templates import BaseModel
 from middlewares.basic_middleware import BasicMiddleware
 from settings import env_settings
 
-from core.router import core_router
-from admin.router import admin_router
-from menu.router import menu_router
+from core.routers import routers
 
 
 async def main():
     logging.basicConfig(level=logging.INFO)
 
-    telegram_token = env_settings.telegram__token
-    database_url = env_settings.database__url
-
-    engine = create_engine(database_url)
+    engine = create_engine(env_settings.database__url)
 
     BaseModel.metadata.create_all(bind=engine)
     session = sessionmaker(engine, expire_on_commit=False)
 
     storage = MemoryStorage()
 
-    bot = Bot(token=telegram_token, default=DefaultBotProperties(parse_mode="HTML"))
+    bot = Bot(token=env_settings.telegram__token, default=DefaultBotProperties(parse_mode="HTML"))
     dp = Dispatcher(bot=bot, storage=storage)
-
-    routers = [
-        core_router,
-        admin_router,
-        menu_router
-    ]
 
     dp.include_routers(*routers)
 

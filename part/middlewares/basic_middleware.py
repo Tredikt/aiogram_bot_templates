@@ -5,6 +5,7 @@ from aiogram.types import TelegramObject
 from sqlalchemy.orm import sessionmaker, Session
 
 from core.db_class import DBClass
+from core.keyboards import Keyboards
 
 
 class BasicMiddleware(BaseMiddleware):
@@ -17,33 +18,36 @@ class BasicMiddleware(BaseMiddleware):
             handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
             event: TelegramObject,
             data: Dict[str, Any]) -> Any:
+        keyboards = Keyboards()
+        data["keyboards"] = keyboards
 
-        if event.callback_query:
-            print(event.callback_query.data)
+        bot = Bot(token=self.token)
+        data["bot"] = bot
 
-        user_id = event.from_user.id
+        with self.session() as session:
+            db = DBClass(session=session)
+            data["db"] = db
 
-        bot = data.get("bot")
-        db = data.get("db")
+        callback_query = event.callback_query
+        message = event.message
 
-        if not bot:
-            bot = Bot(token=self.token)
-            data["bot"] = bot
+        if callback_query:
+            print(callback_query.data)
 
-        if not db:
-            with self.session() as session:
-                db = DBClass(session=session)
+        elif message:
+            user_id = message.from_user.id
+            user = db.user.get(user_id=user_id)
 
-                data["db"] = db
-                user = await db.user.get_user(user_id=user_id)
-                if not user:
-                    full_name = event.from_user.full_name
-                    username = event.from_user.username
+            if not user:
+                user_data = message.from_user
 
-                    await db.user.add_user(
-                        uuid=user_id,
-                        full_name=full_name,
-                        username=username
-                    )
+                db.user.add(
+                    user_id=user_id,
+                    first_name=user_data.first_name,
+                    last_name=user_data.last_name,
+                    full_name=user_data.full_name,
+                    username=user_data.username
+                )
+
 
         return await handler(event, data)

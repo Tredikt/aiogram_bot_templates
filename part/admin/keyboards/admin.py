@@ -1,19 +1,36 @@
+from admin.keyboards.subclasses.rights import RightsKeyboard
+from admin.keyboards.subclasses.subscriptions import SubscriptionKeyboard
+
+from admin.models import Admin
 from core.operations import KeyboardOperations
 
 
 class AdminKeyboard(KeyboardOperations):
+    def __init__(self):
+        self.rights = RightsKeyboard()
+        self.subscriptions = SubscriptionKeyboard()
 
-    async def to_admin(self):
-        buttons = {"Назад": "admin"}
+    async def to_menu(self):
+        buttons = {"<- Назад": "admin"}
 
-        keyboard = await self.create_keyboard(buttons=buttons)
-        return keyboard
+        return await self.create_keyboard(buttons=buttons)
 
-    async def menu(self):
-        buttons = {
-            "Рассылка пользователям": "mailing",
-        }
+    async def menu(self, rights: str | Admin):
+        buttons = {"Рассылка пользователям": "mailing"}
 
-        keyboard = await self.create_keyboard(buttons=buttons)
-        return keyboard
+        if rights == "all":
+            buttons["Подписки"] = "subscriptions"
+            buttons["Админы"] = "rights"
+
+        else:
+            if rights.can_edit_admin:
+                buttons["Админы"] = "rights"
+
+            if rights.can_edit_subscription:
+                buttons["Подписки"] = "subscriptions"
+
+        return await self.create_keyboard(buttons=buttons)
+
+
+
 

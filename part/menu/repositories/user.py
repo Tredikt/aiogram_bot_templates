@@ -1,18 +1,18 @@
 from sqlalchemy import select, insert, update
 
-from user.models.user import User
+from menu.models.user import User
 from core.db_templates import BaseRepository
 
 
 class UserRepository(BaseRepository):
 
-    def add_user(
-            self,
-            user_id: int,
-            first_name: str,
-            full_name: str,
-            last_name: str | None = None,
-            username: str | None = None,
+    def add(
+        self,
+        user_id: int,
+        first_name: str,
+        full_name: str,
+        last_name: str | None = None,
+        username: str | None = None,
     ):
         insert_stmt = insert(User).values(
             user_id=user_id,
@@ -25,29 +25,28 @@ class UserRepository(BaseRepository):
         self.session.execute(statement=insert_stmt)
         self.session.commit()
 
-    def get_user(
-            self,
-            user_id: int | None = None,
-            many: bool | None = None,
+    def get(
+        self,
+        user_id: int | None = None,
+        every: bool = False,
     ):
+        result = None
+
         if user_id:
             select_stmt = select(User).where(User.user_id == user_id)
 
-            result = self.session.execute(statement=select_stmt)
-            return result.scalar_one_or_none()
+            result = self.session.execute(statement=select_stmt).scalar_one_or_none()
 
-        elif many:
+        elif every:
             select_query = select(User.user_id)
-            result = self.session.execute(statement=select_query)
-            return result.scalars().all()
+            result = self.session.execute(statement=select_query).scalars().all()
 
-        else:
-            return None
+        return result
 
-    def update_user(
-            self,
-            user_id: int,
-            **kwargs
+    def update(
+        self,
+        user_id: int,
+        **kwargs
     ):
         update_stmt = update(User).where(User.user_id == user_id).values(**kwargs)
 

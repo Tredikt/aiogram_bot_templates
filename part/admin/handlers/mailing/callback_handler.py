@@ -3,16 +3,17 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from admin.fsm_machine.admin import AdminStates
-from admin.router import admin_router
 from core.keyboards import Keyboards
 
+mailing_callback_router = Router()
 
-@admin_router.callback_query(F.data == "mailing")
+
+@mailing_callback_router.callback_query(F.data == "mailing")
 async def mailing_callback_handler(call: CallbackQuery, state: FSMContext, keyboards: Keyboards):
     await state.set_state(AdminStates.mailing)
     keyboard = await keyboards.admin.to_menu()
 
     await call.message.edit_text(
-        text="Введите сообщения для рассылки пользователям:",
+        text="<i>Введите сообщения для рассылки пользователям:</i>",
         reply_markup=keyboard
     )

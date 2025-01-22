@@ -1,6 +1,4 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.db_templates import BaseModel
 
@@ -13,3 +11,6 @@ class User(BaseModel):
     last_name: Mapped[str] = mapped_column(nullable=True)
     full_name: Mapped[str] = mapped_column(nullable=False)
     username: Mapped[str] = mapped_column(nullable=True)
+
+    admin: Mapped["Admin"] = relationship(argument="Admin", back_populates="user")
+    customer: Mapped["Customer"] = relationship(argument="Customer", back_populates="user")

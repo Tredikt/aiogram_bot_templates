@@ -1,0 +1,10 @@
+from core.handlers.my_id_handler import my_id_router
+
+from admin.routers import admin_routers
+from menu.routers import menu_routers
+
+routers = [
+    my_id_router,
+    *admin_routers,
+    *menu_routers
+]

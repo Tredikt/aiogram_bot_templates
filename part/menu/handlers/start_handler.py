@@ -1,13 +1,13 @@
 from aiogram import Router
-from aiogram.filters import Command
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from core.keyboards import Keyboards
-from menu.router import menu_router
 
+start_router = Router()
 
-@menu_router.message(Command(commands=["start"]))
+@start_router.message(CommandStart())
 async def start_handler(message: Message, state: FSMContext, keyboards: Keyboards):
     await state.clear()
 

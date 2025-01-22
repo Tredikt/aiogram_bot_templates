@@ -3,20 +3,21 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from database import DBClass
-from keyboards import Keyboards
-from handlers.states_handlers.bot_states import BotStates
-
-mailing_router = Router()
+from admin.fsm_machine.admin import AdminStates
+from core.db_class import DBClass
+from core.keyboards import Keyboards
 
 
-@mailing_router.message(F.content_type.ANY, StateFilter(BotStates.mailing))
+mailing_state_router = Router()
+
+
+@mailing_state_router.message(F.content_type.ANY, StateFilter(AdminStates.mailing))
 async def mailing_state_handler(message: Message, state: FSMContext, bot: Bot, db: DBClass, keyboards: Keyboards):
     await state.clear()
     admin_id = message.from_user.id
     message_id = message.message_id
 
-    users = await db.user.get_user(many=True)
+    users = db.user.get(every=True)
 
     for user in users:
         await bot.copy_message(
@@ -25,8 +26,8 @@ async def mailing_state_handler(message: Message, state: FSMContext, bot: Bot, d
             message_id=message_id
         )
 
-    keyboard = await keyboards.admin.back_to_admin()
+    keyboard = await keyboards.admin.to_menu()
     await message.answer(
-        text="Рассылка успешно окончена",
+        text="<i>Рассылка успешно окончена</i>",
         reply_markup=keyboard
     )
