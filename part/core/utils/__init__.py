@@ -1,0 +1,1 @@
+from core.utils.configure import configure_router
