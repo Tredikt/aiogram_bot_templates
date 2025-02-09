@@ -29,6 +29,9 @@ class AdminKeyboard(KeyboardOperations):
             if rights.can_edit_subscription:
                 buttons["Подписки"] = "subscriptions"
 
+            if rights.can_block_user:
+                buttons["Заблокировать пользователя"] = "block_user"
+
         return await self.create_keyboard(buttons=buttons)
 
 

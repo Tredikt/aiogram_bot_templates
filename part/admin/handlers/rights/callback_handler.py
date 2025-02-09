@@ -54,7 +54,7 @@ async def admin_rights_callback_handler(call: CallbackQuery, db: DBClass, keyboa
     )
 
 
-@rights_callback_router.callback_query(F.data.startswith("can_edit_"))
+@rights_callback_router.callback_query(F.data.startswith("can_"))
 async def edit_admin_rights_callback_handler(call: CallbackQuery, db: DBClass, keyboards: Keyboards):
     call_data = call.data
     buttons = call.message.reply_markup.inline_keyboard
@@ -69,7 +69,7 @@ async def edit_admin_rights_callback_handler(call: CallbackQuery, db: DBClass, k
     call_data = call.data.split("_")
     admin_id = int(call_data[-1])
     parameter = "_".join(call_data[:-1])
-    print(is_true)
+
     flag = False if is_true != -1 else True
     kwargs = {parameter: flag}
 

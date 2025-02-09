@@ -12,6 +12,7 @@ class Admin(BaseModel):
 
     can_edit_admin: Mapped[bool] = mapped_column(default=False)
     can_edit_subscription: Mapped[bool] = mapped_column(default=True)
+    can_block_user: Mapped[bool] = mapped_column(default=False)
 
     user: Mapped["User"] = relationship(
         argument="User",
